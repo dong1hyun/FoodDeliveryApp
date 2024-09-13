@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
 import axios, {AxiosError} from 'axios';
 import Config from 'react-native-config';
@@ -9,6 +9,8 @@ import {RootState} from '../store/reducer';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
 function Settings() {
+  const money = useSelector((state: RootState) => state.user.money);
+  const name = useSelector((state: RootState) => state.user.name);
   const accessToken = useSelector((state: RootState) => state.user.accessToken);
   const dispatch = useAppDispatch();
   const onLogout = useCallback(async () => {
@@ -36,9 +38,32 @@ function Settings() {
       console.error(errorResponse);
     }
   }, [accessToken, dispatch]);
+  useEffect(() => {
+    async function getMoney() {
+      const response = await axios.get(
+        `${Config.API_URL}/showmethemoney`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          },
+        }
+      );
+      dispatch(userSlice.actions.setMoney(response.data.data));
+    }
 
+    getMoney();
+  }, []);
   return (
     <View>
+      <View style={styles.money}>
+        <Text style={styles.moneyText}>
+          {name} 님의 수익금
+          <Text style={{fontWeight: 'bold'}}>
+            {money.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+          </Text>
+          원
+        </Text>
+      </View>
       <View style={styles.buttonZone}>
         <Pressable
           style={StyleSheet.compose(
@@ -72,6 +97,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  money: {
+
+  },
+  moneyText: {
+
+  }
 });
 
 export default Settings;
