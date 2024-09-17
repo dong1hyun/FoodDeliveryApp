@@ -36,6 +36,36 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function AppInner() {
   const dispatch = useAppDispatch();
   useEffect(() => {
+    axios.interceptors.request.use(
+      response => {
+        console.log(response);
+        return response;
+      },
+      async (error) => {
+        const { config, response: { status } } = error;
+        if (status === 419) {
+          if (error.response.data.code === 'expired') {
+            const originalRequest = config;
+            const token = await EncryptedStorage.getItem('refreshToken');
+            const {data} = await axios.post(
+              `${Config.API_URL}/refreshToken`,
+              {},
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                }
+              }
+            );
+            dispatch(userSlice.actions.setAccessToken(data.data.accessToken));
+            originalRequest.header.authorization = `Bearer ${data.data.accessToken}`
+            return axios(originalRequest);
+          }
+        }
+        else return Promise.reject(error);
+      }
+    )
+  }, []);
+  useEffect(() => {
     const getRefreshToken = async () => {
       try {
         const token = await EncryptedStorage.getItem('refreshToken');

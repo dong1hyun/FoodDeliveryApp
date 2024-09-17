@@ -16,13 +16,16 @@ const userSlice = createSlice({
       state.accessToken = action.payload.accessToken;
     },
     setName(state, action) {
-      state.name = action.payload
+      state.name = action.payload;
     },
     setEmail(state, action) {
-      state.email = action.payload
+      state.email = action.payload;
     },
     setMoney(state, action) {
-      state.money = action.payload
+      state.money = action.payload;
+    },
+    setAccessToken(state, action) {
+      state.accessToken = action.payload;
     }
   },
   extraReducers: builder => {},
