@@ -19,3 +19,13 @@ buildscript {
         classpath("com.facebook.react:react-native-gradle-plugin")
     }
 }
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        // 네이버 지도 저장소
+        maven {
+            url 'https://repository.map.naver.com/archive/maven'
+        }
+    }
+}

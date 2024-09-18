@@ -73,14 +73,14 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.fooddeliveryapp"
+    namespace "com.gosu.fooddeliveryapp"
     defaultConfig {
-        applicationId "com.fooddeliveryapp"
+        applicationId "com.gosu.fooddeliveryapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        resValue "string", "build_config_package", "com.fooddeliveryapp"
+        resValue "string", "build_config_package", "com.gosu.fooddeliveryapp"
     }
     signingConfigs {
         debug {
