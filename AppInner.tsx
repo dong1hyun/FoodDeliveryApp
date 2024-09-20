@@ -16,6 +16,8 @@ import axios, { AxiosError } from 'axios';
 import userSlice from './src/slices/user';
 import { Alert } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import useSocket from './src/hooks/useSocket';
+import orderSlice from './src/slices/order';
 
 export type LoggedInParamList = {
   Orders: undefined;
@@ -34,11 +36,34 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
 export default function AppInner() {
+  const isLoggedIn = useSelector((state: RootState) => state.user.email);
   const dispatch = useAppDispatch();
+  const [socket, disconnect] = useSocket();
+  useEffect(() => {
+    const callback = (data: any) => {
+      console.log(data);
+      dispatch(orderSlice.actions.addOrder(data));
+    };
+    if (socket && isLoggedIn) {
+      socket.emit('acceptOrder', 'hello');
+      socket.on('order', callback);
+    }
+    return () => {
+      if (socket) {
+        socket.off('order', callback);
+      }
+    };
+  }, [isLoggedIn, socket]);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      console.log('!isLoggedIn', !isLoggedIn);
+      disconnect();
+    }
+  }, [isLoggedIn, disconnect]);
   useEffect(() => {
     axios.interceptors.request.use(
       response => {
-        console.log(response);
         return response;
       },
       async (error) => {
@@ -68,6 +93,7 @@ export default function AppInner() {
   useEffect(() => {
     const getRefreshToken = async () => {
       try {
+        console.log("refresh");
         const token = await EncryptedStorage.getItem('refreshToken');
         if (!token) return;
         const response = await axios.post(
@@ -78,7 +104,7 @@ export default function AppInner() {
               Authorization: `Bearer ${token}`,
             }
           }
-        )
+        );
         dispatch(
           userSlice.actions.setUser({
             name: response.data.data.name,
@@ -87,7 +113,7 @@ export default function AppInner() {
           })
         );
       } catch (error) {
-        console.error(error);
+        // console.error(error);
         if((error as AxiosError<{code: string}>).response?.data.code === 'expired') {
           Alert.alert('알림', "다시 로그인 해주세요.");
         }
@@ -95,7 +121,6 @@ export default function AppInner() {
     }
     getRefreshToken();
   }, []);
-  const isLoggedIn = useSelector((state: RootState) => state.user.email);
   return (
     <NavigationContainer>
       {isLoggedIn ? (
