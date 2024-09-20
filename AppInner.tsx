@@ -18,11 +18,13 @@ import { Alert } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import useSocket from './src/hooks/useSocket';
 import orderSlice from './src/slices/order';
+import usePermissions from './src/hooks/usePermissions';
 
 export type LoggedInParamList = {
   Orders: undefined;
   Settings: undefined;
   Delivery: undefined;
+  Ing: undefined;
   Complete: { orderId: string };
 };
 
@@ -36,6 +38,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
 export default function AppInner() {
+  usePermissions();
   const isLoggedIn = useSelector((state: RootState) => state.user.email);
   const dispatch = useAppDispatch();
   const [socket, disconnect] = useSocket();

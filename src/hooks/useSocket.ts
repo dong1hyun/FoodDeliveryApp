@@ -15,6 +15,7 @@ const useSocket = (): [Socket | undefined, () => void] => {
       transports: ['websocket'],
     });
   }
+
   return [socket, disconnect];
 };
 
